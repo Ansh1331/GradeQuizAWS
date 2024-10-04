@@ -35,11 +35,15 @@ const reducer = (state, action) => {
 };
 const uploadQuizToS3 = async (quizResponse) => {
   try {
-    const response = await axios.post("/uploadQuizResponse", quizResponse, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await axios.post(
+      "https://tey6b2fg5m.execute-api.ap-south-1.amazonaws.com/prod/uploadQuizResponse",
+      quizResponse,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Quiz response uploaded to S3:", response.data.url);
   } catch (error) {

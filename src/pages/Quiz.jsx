@@ -1,19 +1,19 @@
-import { child, get, getDatabase, push, ref, update } from 'firebase/database';
-import _ from 'lodash';
-import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { child, get, getDatabase, push, ref, update } from "firebase/database";
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { PageNotFound } from './';
+import { PageNotFound } from "./";
 
-import { AnswerBox, ProgressBar, Rules } from '../components';
-import { useAuth } from '../contexts/AuthContext';
-import { useQuiz } from '../hooks';
-
+import { AnswerBox, ProgressBar, Rules } from "../components";
+import { useAuth } from "../contexts/AuthContext";
+import { useQuiz } from "../hooks";
+import axios from "axios";
 const initialState = null;
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case 'quiz': {
+    case "quiz": {
       const qnaSet = _.cloneDeep(action.value);
       qnaSet.forEach((question) => {
         question.options.forEach((option) => {
@@ -22,9 +22,10 @@ const reducer = (state, action) => {
       });
       return qnaSet;
     }
-    case 'answer': {
+    case "answer": {
       const question = _.cloneDeep(state);
-      question[action.questionID].options[action.optionIndex].checked = action.value;
+      question[action.questionID].options[action.optionIndex].checked =
+        action.value;
       return question;
     }
 
@@ -32,9 +33,23 @@ const reducer = (state, action) => {
       return state;
   }
 };
+const uploadQuizToS3 = async (quizResponse) => {
+  try {
+    const response = await axios.post("/uploadQuizResponse", quizResponse, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Quiz response uploaded to S3:", response.data.url);
+  } catch (error) {
+    console.error("Failed to upload quiz response to S3:", error);
+  }
+};
 
 function Quiz() {
   const { id } = useParams();
+  console.log(id);
   const { loading, error, quiz } = useQuiz(id);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [qnaSet, dispatch] = useReducer(reducer, initialState);
@@ -44,8 +59,8 @@ function Quiz() {
 
   useEffect(() => {
     dispatch({
-      type: 'quiz',
-      value: quiz
+      type: "quiz",
+      value: quiz,
     });
   }, [quiz]);
 
@@ -53,10 +68,10 @@ function Quiz() {
   const handleAnswerChange = useCallback(
     (e, index) => {
       dispatch({
-        type: 'answer',
+        type: "answer",
         questionID: currentQuestion,
         optionIndex: index,
-        value: e.target.checked
+        value: e.target.checked,
       });
     },
     [dispatch, currentQuestion]
@@ -64,7 +79,8 @@ function Quiz() {
 
   // Get next question
   const nextQuestion = useCallback(() => {
-    if (currentQuestion < qnaSet.length - 1) setCurrentQuestion((curr) => curr + 1);
+    if (currentQuestion < qnaSet.length - 1)
+      setCurrentQuestion((curr) => curr + 1);
   }, [currentQuestion, qnaSet]);
 
   // Get previous question
@@ -74,7 +90,8 @@ function Quiz() {
   }, [currentQuestion, qnaSet]);
 
   // Progress percentage
-  const progressPercentage = qnaSet?.length > 0 ? ((currentQuestion + 1) * 100) / qnaSet.length : 0;
+  const progressPercentage =
+    qnaSet?.length > 0 ? ((currentQuestion + 1) * 100) / qnaSet.length : 0;
 
   // Submit Quiz and store result in the database
   const submitQuiz = useCallback(async () => {
@@ -93,12 +110,14 @@ function Quiz() {
         });
 
         if (checkedIndexes.length === 0) unattemptedCount += 1;
-        else if (_.isEqual(correctIndexes, checkedIndexes)) correctAnswersCount += 1;
+        else if (_.isEqual(correctIndexes, checkedIndexes))
+          correctAnswersCount += 1;
         else incorrectAnswersCount += 1;
       });
 
       const noq = qnaSet?.length;
-      const obtainedPoints = correctAnswersCount * 10 - incorrectAnswersCount * 2;
+      const obtainedPoints =
+        correctAnswersCount * 10 - incorrectAnswersCount * 2;
       const obtainedPercentage = obtainedPoints / (0.1 * noq);
 
       return [
@@ -107,7 +126,7 @@ function Quiz() {
         incorrectAnswersCount,
         unattemptedCount,
         obtainedPoints,
-        obtainedPercentage
+        obtainedPercentage,
       ];
     }
 
@@ -117,22 +136,22 @@ function Quiz() {
       incorrectAnswersCount,
       unattemptedCount,
       obtainedPoints,
-      obtainedPercentage
+      obtainedPercentage,
     ] = getMarkSheet();
 
     const markSheetObject = {
       topicId: id,
-      date: date.toLocaleDateString('en-IN'),
-      time: `${date.getHours() % 12 || 12}:${date.getMinutes().toString().padStart(2, '0')} ${
-        date.getHours() < 12 ? 'AM' : 'PM'
+      date: date.toLocaleDateString("en-IN"),
+      time: `${date.getHours() % 12 || 12}:${date.getMinutes().toString().padStart(2, "0")} ${
+        date.getHours() < 12 ? "AM" : "PM"
       }`,
-      noq: noq,
-      correctAnswersCount: correctAnswersCount,
-      incorrectAnswersCount: incorrectAnswersCount,
-      unattemptedCount: unattemptedCount,
-      obtainedPoints: obtainedPoints,
-      obtainedPercentage: obtainedPercentage,
-      qnaSet: { ...qnaSet }
+      noq,
+      correctAnswersCount,
+      incorrectAnswersCount,
+      unattemptedCount,
+      obtainedPoints,
+      obtainedPercentage,
+      qnaSet: { ...qnaSet },
     };
 
     const { uid } = currentUser;
@@ -141,26 +160,30 @@ function Quiz() {
     const submissionsData = {};
 
     submissionsData[`submissions/${uid}/${submissionsKey}`] = markSheetObject;
+
     try {
-      // Update submission data in the database
+      // Update submission data in Firebase
       await update(ref(db), submissionsData);
 
-      // Manually increase submission count
-      const submissionCountRef = ref(db, 'submissionCount');
+      // Update submission count
+      const submissionCountRef = ref(db, "submissionCount");
       const snapshot = await get(submissionCountRef);
       if (snapshot.exists()) {
         const currentSubmissionCount = snapshot.val()[id] || 0;
         const updatedSubmissionCount = currentSubmissionCount + 1;
 
         await update(submissionCountRef, {
-          [id]: updatedSubmissionCount
+          [id]: updatedSubmissionCount,
         });
       }
+
+      // Send the quiz response to AWS S3
+      await uploadQuizToS3(markSheetObject);
 
       // Navigate to the result page
       navigate(`/result/${id}`, { state: { qnaSet, markSheetObject } });
     } catch (error) {
-      console.error('Error submitting quiz:', error);
+      console.error("Error submitting quiz:", error);
     }
   }, [currentUser, date, id, navigate, qnaSet]);
 
@@ -171,7 +194,7 @@ function Quiz() {
       {!loading && !error && qnaSet && qnaSet?.length === 0 && <PageNotFound />}
       {!loading && !error && qnaSet && qnaSet?.length > 0 && (
         <div className="mx-auto w-[85%] animate-reveal">
-          <h1 className="page-heading">{id.split('-').join(' ')} Quiz!</h1>
+          <h1 className="page-heading">{id.split("-").join(" ")} Quiz!</h1>
           <Rules />
           <div className="card mb-40 flex flex-col justify-center rounded-md p-3">
             <div className="flex flex-col items-center justify-center text-xl font-bold text-black dark:text-white sm:text-3xl">

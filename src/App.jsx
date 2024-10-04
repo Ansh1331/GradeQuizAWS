@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Toaster } from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { Toaster } from "react-hot-toast";
 import {
   Route,
   RouterProvider,
   Routes,
   ScrollRestoration,
-  createBrowserRouter
-} from 'react-router-dom';
+  createBrowserRouter,
+} from "react-router-dom";
 
 import {
   DesignComponent,
@@ -14,10 +14,10 @@ import {
   MainNavigationBar,
   Preloader,
   PrivateOutlet,
-  PublicOutlet
-} from './components';
+  PublicOutlet,
+} from "./components";
 // eslint-disable-next-line import/order
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider } from "./contexts/AuthContext";
 
 // Website Pages
 import {
@@ -34,9 +34,8 @@ import {
   Result,
   SignUp,
   Submissions,
-  Video
-} from './pages';
-
+  Video,
+} from "./pages";
 
 function Root() {
   return (
@@ -55,8 +54,16 @@ function Root() {
             <Route element={<Login />} path="login" />
           </Route>
           <Route element={<PrivateOutlet />} path="/">
-            <Route element={<Quiz />} errorElement={<PageNotFound />} path="quiz/:id" />
-            <Route element={<Video />} errorElement={<PageNotFound />} path="video/:id" />
+            <Route
+              element={<Quiz />}
+              errorElement={<PageNotFound />}
+              path="quiz/:id"
+            />
+            <Route
+              element={<Video />}
+              errorElement={<PageNotFound />}
+              path="video/:id"
+            />
             <Route element={<Profile />} path="profile" />
             <Route element={<Submissions />} path="submissions" />
             <Route
@@ -64,7 +71,11 @@ function Root() {
               errorElement={<PageNotFound />}
               path="detailed-submission"
             />
-            <Route element={<Result />} errorElement={<PageNotFound />} path="result/:id" />
+            <Route
+              element={<Result />}
+              errorElement={<PageNotFound />}
+              path="result/:id"
+            />
           </Route>
           <Route element={<PageNotFound />} path="*" />
         </Route>
@@ -73,17 +84,18 @@ function Root() {
   );
 }
 
-const router = createBrowserRouter([{ path: '*', Component: Root }]);
+const router = createBrowserRouter([{ path: "*", Component: Root }]);
 
 function App() {
   // Website theme
   if (
-    localStorage.theme === 'dark' ||
-    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    localStorage.theme === "dark" ||
+    (!("theme" in localStorage) &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches)
   ) {
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.add("dark");
   } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
   }
 
   // Preloading state
@@ -108,11 +120,11 @@ function App() {
             position="top-center"
             toastOptions={{
               style: {
-                color: '#000',
+                color: "#000",
                 fontWeight: 600,
-                background: '#44BBA9'
+                background: "#44BBA9",
               },
-              duration: 3000
+              duration: 3000,
             }}
           />
         </AuthProvider>

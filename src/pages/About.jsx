@@ -30,11 +30,11 @@ function About() {
         Developed with 💚 by &nbsp;
         <a
           className="cursor-pointer hover:underline"
-          href="https://www.s4shibam.com"
+          href="https://www.ansh.com"
           rel="noreferrer"
           target="_blank"
         >
-          Shibam Saha.
+          Ansh Singhal.
         </a>
       </span>
 

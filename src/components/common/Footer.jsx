@@ -31,20 +31,13 @@ function Footer() {
             <h2 className="text-sm font-semibold uppercase">Follow us</h2>
             <a
               className="hover:underline "
-              href="https://github.com/s4shibam"
+              href="https://github.com/Ansh1331"
               rel="noopener noreferrer"
               target="_blank"
             >
               Github
             </a>
-            <a
-              className="hover:underline"
-              href="https://www.linkedin.com/in/s4shibam"
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              LinkedIn
-            </a>
+            
           </div>
           <div className="flex flex-col gap-4">
             <h2 className="text-sm font-semibold uppercase">Legal</h2>
@@ -64,12 +57,12 @@ function Footer() {
             Developed with 💚 by &nbsp;
             <a
               className="cursor-pointer hover:underline"
-              href="https://www.s4shibam.com"
+              href="https://www.anshsinghal.com"
               rel="noopener noreferrer"
               target="_blank"
-              onClick={() => gaEventTracker({ label: 'Shibam Saha' })}
+              onClick={() => gaEventTracker({ label: 'Ansh Singhal' })}
             >
-              Shibam Saha.
+              Ansh Singhal.
             </a>
           </span>
           <span>
@@ -82,7 +75,7 @@ function Footer() {
         </div>
         <div className="mx-auto mt-4 flex w-fit space-x-6 sm:justify-center md:mx-0 md:mt-0">
           <a
-            href="https://www.facebook.com/s4shibam"
+            href="https://www.facebook.com/ansh"
             rel="noopener noreferrer"
             target="_blank"
             onClick={() => gaEventTracker({ label: 'Facebook' })}
@@ -97,7 +90,7 @@ function Footer() {
             <span className="sr-only">Facebook</span>
           </a>
           <a
-            href="https://www.instagram.com/s4shibam"
+            href="https://www.instagram.com/ansh"
             rel="noopener noreferrer"
             target="_blank"
             onClick={() => gaEventTracker({ label: 'Instagram' })}
@@ -112,7 +105,7 @@ function Footer() {
             <span className="sr-only">Instagram</span>
           </a>
           <a
-            href="https://twitter.com/s4shibam"
+            href="https://twitter.com/ansh"
             rel="noopener noreferrer"
             target="_blank"
             onClick={() => gaEventTracker({ label: 'Twitter' })}
@@ -123,7 +116,7 @@ function Footer() {
             <span className="sr-only">Twitter</span>
           </a>
           <a
-            href="https://github.com/s4shibam"
+            href="https://github.com/ansh"
             rel="noopener noreferrer"
             target="_blank"
             onClick={() => gaEventTracker({ label: 'Github' })}
